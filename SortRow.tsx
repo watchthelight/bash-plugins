@@ -18,7 +18,12 @@ function RowIcon({ className }: { className?: string; }) {
     return <span className={`vc-ghosted-icon vc-ghosted-row-icon ${className ?? ""}`} aria-hidden="true" />;
 }
 
+let lastToggle = 0;
+// both the capture handler on the <a> and onClick on the <li> may fire for one click; collapse them
 function toggle() {
+    const now = Date.now();
+    if (now - lastToggle < 150) return;
+    lastToggle = now;
     settings.store.sortActive = !settings.store.sortActive;
 }
 
@@ -35,10 +40,11 @@ export const SortRow = ErrorBoundary.wrap(function SortRow() {
             icon={RowIcon}
             text={sortActive ? "Sorted by ghosted" : "Sort by ghosted"}
             className={`vc-ghosted-sort-row ${sortActive ? "vc-ghosted-sort-active" : ""}`}
-            // spread onto the <a>: fires before react-router's own onClick, so preventDefault stops navigation
+            // onClick lands on the outer <li> — the prop Discord's own rows (Message Requests) use
+            onClick={toggle}
+            // if the Link forwards rest props to its <a>, this fires first and stops the (same-path) navigation
             onClickCapture={(e: React.MouseEvent) => {
                 e.preventDefault();
-                e.stopPropagation();
                 toggle();
             }}
         >

@@ -9,6 +9,7 @@ import "./styles.css";
 import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { plugins } from "@api/PluginManager";
 import definePlugin from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { ChannelStore, Menu, MessageStore, UserStore } from "@webpack/common";
@@ -23,6 +24,28 @@ const DECORATOR_ID = "Ghosted";
 const SNOOZE_MS = 24 * 3600e3;
 
 let tickTimer: ReturnType<typeof setInterval> | null = null;
+
+// PinDMs renders its categories from its own getCategoryChannels(), not from privateChannelIds,
+// so the list-level sort never reaches pinned DMs. Wrap that method on the plugin object so each
+// category is sorted the same way. Method is called with `this` = the PinDMs plugin object.
+type CategoryChannelsFn = (category: unknown) => string[];
+let originalGetCategoryChannels: CategoryChannelsFn | null = null;
+
+function patchPinDms() {
+    const pinDms = plugins.PinDMs as { getCategoryChannels?: CategoryChannelsFn; } | undefined;
+    if (!pinDms?.getCategoryChannels || originalGetCategoryChannels) return;
+    originalGetCategoryChannels = pinDms.getCategoryChannels;
+    const original = originalGetCategoryChannels;
+    pinDms.getCategoryChannels = function (this: unknown, category: unknown) {
+        return Store.sortIds(original.call(this, category));
+    };
+}
+
+function unpatchPinDms() {
+    const pinDms = plugins.PinDMs as { getCategoryChannels?: CategoryChannelsFn; } | undefined;
+    if (pinDms && originalGetCategoryChannels) pinDms.getCategoryChannels = originalGetCategoryChannels;
+    originalGetCategoryChannels = null;
+}
 
 const userContextPatch: NavContextMenuPatchCallback = (children, props: { channel?: Channel; }) => {
     // "user-context" also fires from message avatars / member list / friends list
@@ -143,6 +166,7 @@ export default definePlugin({
 
         addMemberListDecorator(DECORATOR_ID, ({ channel }) => channel ? <GhostBadge channelId={channel.id} /> : null, "dms");
         addProfileBadge(ContributorBadge);
+        patchPinDms();
 
         tickTimer = setInterval(Store.tick, 60e3);
 
@@ -154,6 +178,7 @@ export default definePlugin({
     stop() {
         removeMemberListDecorator(DECORATOR_ID);
         removeProfileBadge(ContributorBadge);
+        unpatchPinDms();
         if (tickTimer) {
             clearInterval(tickTimer);
             tickTimer = null;
