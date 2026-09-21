@@ -12,30 +12,91 @@ Discord only badges *unread* DMs. Read one first thing in the morning, think "I'
 
 ## Install
 
-Userplugins need a Vencord built from source — the stock installer build can't load them.
+Userplugins need a Vencord built from source — the stock installer build can't load them. Takes about 5 minutes on a fresh machine.
 
-```sh
+### Windows, from nothing
+
+Open **PowerShell** (Start → type `powershell` → Enter). Paste each block, wait for it to finish.
+
+**1. Tools** — Git, Node.js (needs 22 or newer), pnpm:
+
+```powershell
+winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
+winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
+```
+
+Close PowerShell and open a new one so it picks up the new tools, then:
+
+```powershell
+npm install -g pnpm
+```
+
+If PowerShell complains that *running scripts is disabled on this system*:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+**2. Vencord + plugin** — this puts everything in `C:\Users\<you>\Vencord`:
+
+```powershell
+cd ~
 git clone https://github.com/Vendicated/Vencord
 cd Vencord
 pnpm install --frozen-lockfile
 git clone https://github.com/watchthelight/vencord-ghosted src/userplugins/ghosted
 pnpm build
-pnpm inject     # close Discord first; picks your Discord install and points it at this build
 ```
 
-Needs Node ≥ 22 and pnpm. Then in Discord: **Settings → Vencord → Plugins → Ghosted → enable**, Ctrl+R.
+(`pnpm install` may say it's downloading a newer pnpm — that's expected, let it.)
 
-Already building Vencord from source? Only the `git clone ... src/userplugins/ghosted` and `pnpm build` steps are new.
+**3. Inject** — fully quit Discord first (tray icon → Quit Discord), then:
+
+```powershell
+pnpm inject
+```
+
+Pick your Discord install when asked (Stable, PTB or Canary). It downloads a small installer, patches Discord to load this build, and says *Success*.
+
+**4. Enable** — open Discord → User Settings → **Vencord → Plugins** → search `Ghosted` → toggle on → press Ctrl+R.
+
+Your existing Vencord settings, themes and plugins carry over — they live in `%AppData%\Vencord`, not in the build.
+
+### Already building Vencord from source?
+
+Only these are new:
+
+```sh
+git clone https://github.com/watchthelight/vencord-ghosted src/userplugins/ghosted
+pnpm build
+```
+
+### macOS / Linux
+
+Same steps; install Git, Node ≥ 22 and pnpm with your package manager (`brew install git node pnpm` on macOS), then follow **2–4**.
 
 ### Update
 
-```sh
-cd src/userplugins/ghosted && git pull && cd ../../.. && pnpm build
+```powershell
+cd ~/Vencord/src/userplugins/ghosted
+git pull
+cd ~/Vencord
+pnpm build
 ```
+
+Ctrl+R in Discord afterwards. To update Vencord itself, `git pull` in `~/Vencord` too, then `pnpm install --frozen-lockfile && pnpm build`.
 
 ### Uninstall
 
-Delete `src/userplugins/ghosted`, `pnpm build`. `pnpm uninject` if you want stock Vencord back.
+Delete `~/Vencord/src/userplugins/ghosted`, run `pnpm build`. To go back to stock Vencord: `pnpm uninject` then re-run the normal Vencord installer.
+
+### Troubleshooting
+
+- `pnpm : File ... cannot be loaded because running scripts is disabled` → the `Set-ExecutionPolicy` line above.
+- `error: No such built-in module: node:sqlite` or `engines: node >= 22` → Node too old. `node --version` should print v22 or higher; reinstall Node LTS.
+- `git` / `node` / `pnpm` "not recognized" → open a new PowerShell window; the PATH only updates for new windows.
+- `pnpm inject` says Discord is running → quit it from the tray icon, not just the X button.
+- Plugin not in the list → you're running stock Vencord, not this build. Re-run `pnpm inject`.
 
 ## Settings
 
