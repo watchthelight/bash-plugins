@@ -19,7 +19,7 @@ export const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    // skip when this build already lists the author in Devs (own fork) — BadgeAPI shows it there
+    // skip when this build already lists the author in Devs (own fork), BadgeAPI shows it there
     shouldShow: ({ userId }) => userId === AUTHOR_ID && !isPluginDev(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };

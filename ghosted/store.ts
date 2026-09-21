@@ -240,7 +240,7 @@ async function fetchLast(channelId: string) {
 /**
  * Bring state up to date with ChannelStore's lastMessageId for every DM.
  * Cached messages are free; the N most recent unknowns are fetched over REST.
- * Idempotent — the queue dedupes by channel.
+ * Idempotent, the queue dedupes by channel.
  */
 export function bootstrap() {
     const dms = ChannelStore.getSortedPrivateChannels()

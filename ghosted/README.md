@@ -1,132 +1,48 @@
 # Ghosted
 
-A [Vencord](https://vencord.dev) userplugin that flags DMs you've **read but never replied to**.
+A Vencord plugin that flags DMs you read but never answered.
 
-Discord only badges *unread* DMs. Read one first thing in the morning, think "I'll answer later", and it looks exactly like a finished conversation. Ghosted puts a small ghost + age (`6h`) on the DM row in the sidebar until you reply.
+Discord only badges unread DMs. Read one first thing in the morning, think "I'll answer later", and it looks exactly like a finished conversation. Ghosted puts a small ghost and a timer (`6h`) on the DM row in the sidebar until you reply.
 
-- Counts a 1:1 DM as ghosted when: they sent the last message, you've read it, and N hours passed (default 2).
-- Cleared by: sending a message, reacting to their message (toggleable), or right-click → **Not ghosting** / **Snooze ghost 24h**.
-- On startup it fetches the last message of your ~30 most recent DMs so ghosts from before install show up immediately (configurable; 0 disables).
-- **Sort by ghosted** row in the DM list (under Quests): click to reorder DMs with the longest-ghosted person on top; click again to restore Discord's order. Shows how many people you're ghosting.
-- Bots ignored by default. Group DMs and servers are not tracked. DMs pinned with PinDMs stay in their categories.
+- A 1:1 DM counts as ghosted when the other person sent the last message, you have read it, and a set number of hours have passed (default 2).
+- It clears when you send a message, react to their message (can be turned off), or right click the DM and pick "Not ghosting" or "Snooze ghost 24h".
+- On startup it fetches the last message of your 30 most recent DMs so ghosts from before you installed it show up right away. That number is a setting, and 0 turns the fetch off.
+- The "Sort by ghosted" row in the DM list, just under Quests, reorders DMs with the person who has waited longest on top. Click it again to go back to Discord's order. It shows how many people you're ghosting.
+- Bots are ignored by default. Group DMs and servers are not tracked. DMs pinned with PinDMs stay in their categories and are sorted inside them.
 
 ## Install
 
-Userplugins need a Vencord built from source — the stock installer build can't load them. Takes about 5 minutes on a fresh machine.
-
-### Windows, from nothing
-
-Open **PowerShell** (Start → type `powershell` → Enter). Paste each block, wait for it to finish.
-
-**1. Tools** — Git, Node.js (needs 22 or newer), pnpm:
-
-```powershell
-winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
-winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
-```
-
-Close PowerShell and open a new one so it picks up the new tools, then:
-
-```powershell
-npm install -g pnpm
-```
-
-If PowerShell complains that *running scripts is disabled on this system*:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-```
-
-**2. Vencord + plugin** — this puts everything in `C:\Users\<you>\Vencord`:
-
-```powershell
-cd ~
-git clone https://github.com/Vendicated/Vencord
-cd Vencord
-pnpm install --frozen-lockfile
-git clone https://github.com/watchthelight/vencord-ghosted src/userplugins/ghosted
-pnpm build
-```
-
-(`pnpm install` may say it's downloading a newer pnpm — that's expected, let it.)
-
-**3. Inject** — fully quit Discord first (tray icon → Quit Discord), then:
-
-```powershell
-pnpm inject
-```
-
-Pick your Discord install when asked (Stable, PTB or Canary). It downloads a small installer, patches Discord to load this build, and says *Success*.
-
-**4. Enable** — open Discord → User Settings → **Vencord → Plugins** → search `Ghosted` → toggle on → press Ctrl+R.
-
-Your existing Vencord settings, themes and plugins carry over — they live in `%AppData%\Vencord`, not in the build.
-
-### Already building Vencord from source?
-
-Only these are new:
-
-```sh
-git clone https://github.com/watchthelight/vencord-ghosted src/userplugins/ghosted
-pnpm build
-```
-
-### macOS / Linux
-
-Same steps; install Git, Node ≥ 22 and pnpm with your package manager (`brew install git node pnpm` on macOS), then follow **2–4**.
-
-### Update
-
-```powershell
-cd ~/Vencord/src/userplugins/ghosted
-git pull
-cd ~/Vencord
-pnpm build
-```
-
-Ctrl+R in Discord afterwards. To update Vencord itself, `git pull` in `~/Vencord` too, then `pnpm install --frozen-lockfile && pnpm build`.
-
-### Uninstall
-
-Delete `~/Vencord/src/userplugins/ghosted`, run `pnpm build`. To go back to stock Vencord: `pnpm uninject` then re-run the normal Vencord installer.
-
-### Troubleshooting
-
-- `pnpm : File ... cannot be loaded because running scripts is disabled` → the `Set-ExecutionPolicy` line above.
-- `error: No such built-in module: node:sqlite` or `engines: node >= 22` → Node too old. `node --version` should print v22 or higher; reinstall Node LTS.
-- `git` / `node` / `pnpm` "not recognized" → open a new PowerShell window; the PATH only updates for new windows.
-- `pnpm inject` says Discord is running → quit it from the tray icon, not just the X button.
-- Plugin not in the list → you're running stock Vencord, not this build. Re-run `pnpm inject`.
+This plugin ships as part of [bash-plugins](https://github.com/watchthelight/bash-plugins). The README there covers installing on a fresh machine and updating from inside Discord.
 
 ## Settings
 
 | Setting | Default | |
 |---|---|---|
-| Hours before ghosted | 2 | 0 = flag immediately |
+| Hours before ghosted | 2 | 0 flags immediately |
 | Also flag unread DMs | off | Discord already badges those |
 | Ignore bots | on | |
 | Reaction counts as reply | on | |
-| DMs to fetch on startup | 30 | 0 = never call the API, track from now on only |
+| DMs to fetch on startup | 30 | 0 never calls the API, tracking starts from install |
 | Show age next to icon | on | |
-| Show 'Sort by ghosted' row | on | |
+| Show "Sort by ghosted" row | on | |
 
 ## Theming
 
-Badge is `.vc-ghosted-badge`, the nav row `.vc-ghosted-sort-row`. Colours:
+The badge is `.vc-ghosted-badge`, the nav row is `.vc-ghosted-sort-row`. Colours:
 
 ```css
 :root {
     --vc-ghosted-color: #ffd257; /* base */
-    --vc-ghosted-shine: #fff7d6; /* highlight that sweeps across */
+    --vc-ghosted-shine: #fff7d6; /* highlight that sweeps across on hover */
 }
 ```
 
-The sweep animation is off under `prefers-reduced-motion`.
+The sweep is off under `prefers-reduced-motion`.
 
 ## How it works
 
-Tracks the last message per DM from Discord's own flux events (`MESSAGE_CREATE`, `MESSAGE_DELETE`, reactions, message loads), persists it in Vencord's DataStore, and renders through Vencord's `MemberListDecorators` API — no fragile patches to Discord's DM list. Read state comes from `ReadStateStore.ackMessageId`, ignored while Discord marks it as estimated (right after reconnect).
+It tracks the last message per DM from Discord's own flux events (`MESSAGE_CREATE`, `MESSAGE_DELETE`, reactions, message loads), keeps that in Vencord's DataStore, and draws the badge through Vencord's `MemberListDecorators` API, so there are no fragile patches into Discord's DM list. Read state comes from `ReadStateStore.ackMessageId` and is ignored while Discord marks it as estimated (right after a reconnect).
 
 ## License
 
-GPL-3.0-or-later, same as Vencord.
+GPL-3.0-or-later, the same as Vencord.

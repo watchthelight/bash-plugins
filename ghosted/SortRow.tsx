@@ -29,7 +29,7 @@ function toggle() {
     settings.store.sortActive = on;
     const n = getGhostCount();
     showToast(
-        on ? `Sorting by ghosted — ${n} ghosted DM${n === 1 ? "" : "s"}` : "Back to Discord's order",
+        on ? `Sorting by ghosted, ${n} ghosted DM${n === 1 ? "" : "s"}` : "Back to Discord's order",
         on && n === 0 ? Toasts.Type.FAILURE : Toasts.Type.SUCCESS
     );
 }
