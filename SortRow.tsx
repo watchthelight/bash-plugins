@@ -6,6 +6,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
+import { showToast, Toasts } from "@webpack/common";
 
 import { settings } from "./settings";
 import { getGhostCount, useGhostVersion } from "./store";
@@ -24,7 +25,13 @@ function toggle() {
     const now = Date.now();
     if (now - lastToggle < 150) return;
     lastToggle = now;
-    settings.store.sortActive = !settings.store.sortActive;
+    const on = !settings.store.sortActive;
+    settings.store.sortActive = on;
+    const n = getGhostCount();
+    showToast(
+        on ? `Sorting by ghosted — ${n} ghosted DM${n === 1 ? "" : "s"}` : "Back to Discord's order",
+        on && n === 0 ? Toasts.Type.FAILURE : Toasts.Type.SUCCESS
+    );
 }
 
 export const SortRow = ErrorBoundary.wrap(function SortRow() {
@@ -33,22 +40,26 @@ export const SortRow = ErrorBoundary.wrap(function SortRow() {
     const count = getGhostCount();
 
     return (
-        <LinkButton
-            selected={sortActive}
-            // Link needs a pathname; current one = no navigation. click is swallowed in capture below anyway
-            route={window.location.pathname}
-            icon={RowIcon}
-            text={sortActive ? "Sorted by ghosted" : "Sort by ghosted"}
-            className={`vc-ghosted-sort-row ${sortActive ? "vc-ghosted-sort-active" : ""}`}
-            // onClick lands on the outer <li> — the prop Discord's own rows (Message Requests) use
-            onClick={toggle}
-            // if the Link forwards rest props to its <a>, this fires first and stops the (same-path) navigation
+        // display:contents wrapper: no layout impact, but a capture-phase listener here sees every click
+        // inside the row before Discord's Link does, whatever props LinkButton forwards or swallows
+        <div
+            className="vc-ghosted-sort-wrap"
             onClickCapture={(e: React.MouseEvent) => {
                 e.preventDefault();
+                e.stopPropagation();
                 toggle();
             }}
         >
-            {count > 0 && <span className="vc-ghosted-sort-count">{count}</span>}
-        </LinkButton>
+            <LinkButton
+                selected={sortActive}
+                // Link needs a pathname; current one = no-op even if a click ever got through
+                route={window.location.pathname}
+                icon={RowIcon}
+                text={sortActive ? "Sorted by ghosted" : "Sort by ghosted"}
+                className={`vc-ghosted-sort-row ${sortActive ? "vc-ghosted-sort-active" : ""}`}
+            >
+                {count > 0 && <span className="vc-ghosted-sort-count">{count}</span>}
+            </LinkButton>
+        </div>
     );
 }, { noop: true });

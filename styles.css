@@ -68,6 +68,10 @@
 
 /* ---------- "Sort by ghosted" nav row ---------- */
 
+.vc-ghosted-sort-wrap {
+    display: contents;
+}
+
 .vc-ghosted-row-icon {
     width: 20px;
     height: 20px;
