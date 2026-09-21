@@ -1,0 +1,26 @@
+/* Every CSS transition ends immediately. Not 0ms: transitionend must still fire,
+   Discord unmounts some layers on that event. */
+*,
+*::before,
+*::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    animation-delay: 0ms !important;
+}
+
+/* Finite animations snap to their end. Infinite ones (spinners, typing dots, pulses)
+   keep their timing so they don't loop thousands of times a second. */
+*:not(
+    [class*="spinner" i],
+    [class*="spinning" i],
+    [class*="pulsing" i],
+    [class*="wanderingcubes" i],
+    [class*="loading" i],
+    [class*="progress" i],
+    [class*="typing" i],
+    [class*="dots" i],
+    .vc-ghosted-shine
+) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+}

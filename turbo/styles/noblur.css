@@ -1,0 +1,4 @@
+/* Backdrop blur is re-rendered every frame anything behind it changes. */
+* {
+    backdrop-filter: none !important;
+}
