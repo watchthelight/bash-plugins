@@ -5,16 +5,21 @@
  */
 
 import { BadgePosition, ProfileBadge } from "@api/Badges";
+import { openContributorModal } from "@components/settings/tabs";
+import { isPluginDev } from "@utils/misc";
+import { UserStore } from "@webpack/common";
 
 export const AUTHOR_ID = "697169405422862417";
 
-const GHOST_SVG = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#e8c872' fill-rule='evenodd'><path d='M4 10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2L4 21zm3.7 1a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0zm6 0a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0z'/></svg>";
+// same asset Vencord's BadgeAPI uses for its contributor badge
+const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 
-export const DeveloperBadge: ProfileBadge = {
-    id: "ghosted_developer",
-    description: "Ghosted Developer",
-    iconSrc: `data:image/svg+xml,${encodeURIComponent(GHOST_SVG)}`,
+export const ContributorBadge: ProfileBadge = {
+    id: "vencord_contributor_badge",
+    description: "Vencord Contributor",
+    iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
-    link: "https://github.com/watchthelight/vencord-ghosted",
-    shouldShow: ({ userId }) => userId === AUTHOR_ID
+    // skip when this build already lists the author in Devs (own fork) — BadgeAPI shows it there
+    shouldShow: ({ userId }) => userId === AUTHOR_ID && !isPluginDev(userId),
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };

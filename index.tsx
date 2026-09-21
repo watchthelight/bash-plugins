@@ -13,7 +13,7 @@ import definePlugin from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { ChannelStore, Menu, MessageStore, UserStore } from "@webpack/common";
 
-import { AUTHOR_ID, DeveloperBadge } from "./badge";
+import { AUTHOR_ID, ContributorBadge } from "./badge";
 import { GhostBadge } from "./GhostBadge";
 import { settings } from "./settings";
 import * as Store from "./store";
@@ -102,7 +102,7 @@ export default definePlugin({
         await Store.load();
 
         addMemberListDecorator(DECORATOR_ID, ({ channel }) => channel ? <GhostBadge channelId={channel.id} /> : null, "dms");
-        addProfileBadge(DeveloperBadge);
+        addProfileBadge(ContributorBadge);
 
         tickTimer = setInterval(Store.tick, 60e3);
 
@@ -113,7 +113,7 @@ export default definePlugin({
 
     stop() {
         removeMemberListDecorator(DECORATOR_ID);
-        removeProfileBadge(DeveloperBadge);
+        removeProfileBadge(ContributorBadge);
         if (tickTimer) {
             clearInterval(tickTimer);
             tickTimer = null;
