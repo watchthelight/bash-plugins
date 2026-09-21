@@ -1,0 +1,18 @@
+.vc-ghosted-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    color: var(--vc-ghosted-color, var(--text-muted));
+    font-size: 11px;
+    line-height: 1;
+}
+
+.vc-ghosted-badge svg {
+    width: 14px;
+    height: 14px;
+}
+
+.vc-ghosted-age {
+    font-weight: 500;
+}
