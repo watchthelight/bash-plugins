@@ -9,8 +9,10 @@
 }
 
 /* Finite animations snap to their end. Infinite ones (spinners, typing dots, pulses)
-   keep their timing so they don't loop thousands of times a second. */
-*:not(
+   keep their timing so they don't loop thousands of times a second.
+   Only elements with a class carry Discord animations, so the :not() chain is
+   evaluated on far fewer nodes than a bare * would be. */
+[class]:not(
     [class*="spinner" i],
     [class*="spinning" i],
     [class*="pulsing" i],
