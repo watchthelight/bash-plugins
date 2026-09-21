@@ -12,8 +12,6 @@ import { app } from "electron";
 
 // keep in sync with FLAG_SETTINGS in settings.ts (natives can't import renderer code)
 const FLAGS: Record<string, { switches: [string, string?][]; default: boolean; }> = {
-    flagRendererBackgrounding: { switches: [["disable-renderer-backgrounding"]], default: true },
-    flagTimerThrottling: { switches: [["disable-background-timer-throttling"]], default: true },
     flagWinOcclusion: { switches: [["disable-features", "CalculateNativeWinOcclusion"]], default: true },
     flagGpuRasterization: { switches: [["enable-gpu-rasterization"], ["enable-zero-copy"]], default: true },
     flagIgnoreGpuBlocklist: { switches: [["ignore-gpu-blocklist"]], default: false },

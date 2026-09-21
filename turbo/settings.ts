@@ -12,17 +12,9 @@ import { Report } from "./report";
 import instantStyle from "./styles/instant.css?managed";
 import noBlurStyle from "./styles/noblur.css?managed";
 
+// Discord already launches with --disable-renderer-backgrounding and
+// --disable-background-timer-throttling, so those are not offered here.
 export const FLAG_SETTINGS = {
-    flagRendererBackgrounding: {
-        switches: [["disable-renderer-backgrounding"]],
-        default: true,
-        description: "Keep the renderer at full speed when another window has focus (disable-renderer-backgrounding)"
-    },
-    flagTimerThrottling: {
-        switches: [["disable-background-timer-throttling"]],
-        default: true,
-        description: "Timers keep their normal rate in the background (disable-background-timer-throttling)"
-    },
     flagWinOcclusion: {
         switches: [["disable-features", "CalculateNativeWinOcclusion"]],
         default: true,
@@ -41,12 +33,12 @@ export const FLAG_SETTINGS = {
     flagHighPerfGpu: {
         switches: [["force_high_performance_gpu"]],
         default: false,
-        description: "Laptops with two GPUs: use the fast one"
+        description: "Force the dedicated GPU. Leave OFF on a laptop whose screen is wired to the integrated GPU: every frame then gets copied between the two and scrolling stutters. Only useful for an external monitor plugged straight into the dedicated GPU"
     },
     flagNoFrameLimit: {
         switches: [["disable-frame-rate-limit"]],
         default: false,
-        description: "Uncap the compositor frame rate. Burns GPU for little gain"
+        description: "Remove Chromium's vsync pacing. Measured to make scrolling worse on a 165 Hz panel, keep it off unless you are benchmarking"
     }
 } as const;
 

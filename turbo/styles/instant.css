@@ -1,28 +1,11 @@
-/* Every CSS transition ends immediately. Not 0ms: transitionend must still fire,
-   Discord unmounts some layers on that event. */
+/* Transitions off entirely. A 0s duration creates no transition object, which matters:
+   a near-zero duration like 0.01ms still spawns a transition for every property change on
+   every element the message list touches while scrolling, and that alone cut frame rate
+   from 165 to ~33 fps when measured. Keyframe animations are left alone: Discord's remaining
+   ones are spinners and pulses, and react-spring (the real UI motion) is handled in JS. */
 *,
 *::before,
 *::after {
-    transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
-    animation-delay: 0ms !important;
-}
-
-/* Finite animations snap to their end. Infinite ones (spinners, typing dots, pulses)
-   keep their timing so they don't loop thousands of times a second.
-   Only elements with a class carry Discord animations, so the :not() chain is
-   evaluated on far fewer nodes than a bare * would be. */
-[class]:not(
-    [class*="spinner" i],
-    [class*="spinning" i],
-    [class*="pulsing" i],
-    [class*="wanderingcubes" i],
-    [class*="loading" i],
-    [class*="progress" i],
-    [class*="typing" i],
-    [class*="dots" i],
-    .vc-ghosted-shine
-) {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
 }
