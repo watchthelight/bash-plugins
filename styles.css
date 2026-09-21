@@ -1,18 +1,97 @@
+/*
+ * theming hooks:
+ *   --vc-ghosted-color   base gold
+ *   --vc-ghosted-shine   highlight that sweeps across
+ */
+:root {
+    --vc-ghosted-color: #ffd257;
+    --vc-ghosted-shine: #fff7d6;
+    --vc-ghosted-gradient: linear-gradient(
+        100deg,
+        var(--vc-ghosted-color) 0%,
+        var(--vc-ghosted-color) 35%,
+        var(--vc-ghosted-shine) 50%,
+        var(--vc-ghosted-color) 65%,
+        var(--vc-ghosted-color) 100%
+    );
+}
+
+/* ---------- DM row badge ---------- */
+
 .vc-ghosted-badge {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
     flex-shrink: 0;
-    color: var(--vc-ghosted-color, var(--text-muted));
     font-size: 11px;
     line-height: 1;
-}
-
-.vc-ghosted-badge svg {
-    width: 14px;
-    height: 14px;
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--vc-ghosted-color) 55%, transparent));
 }
 
 .vc-ghosted-age {
-    font-weight: 500;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* ghost silhouette; painted by whatever background the element has */
+.vc-ghosted-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background: var(--vc-ghosted-color);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' fill-rule='evenodd'%3E%3Cpath d='M4 10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2L4 21zm3.7 1a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0zm6 0a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* animated gradient: on the icon via mask, on the text via background-clip */
+.vc-ghosted-shine {
+    background: var(--vc-ghosted-gradient);
+    background-size: 300% 100%;
+    animation: vc-ghosted-sweep 2.6s linear infinite;
+}
+
+.vc-ghosted-age.vc-ghosted-shine {
+    color: transparent;
+    background-clip: text;
+}
+
+@keyframes vc-ghosted-sweep {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vc-ghosted-shine {
+        animation: none;
+        background: var(--vc-ghosted-color);
+    }
+}
+
+/* ---------- "Sort by ghosted" nav row ---------- */
+
+.vc-ghosted-row-icon {
+    width: 20px;
+    height: 20px;
+    background: currentcolor;
+}
+
+.vc-ghosted-sort-active .vc-ghosted-row-icon {
+    background: var(--vc-ghosted-gradient);
+    background-size: 300% 100%;
+    animation: vc-ghosted-sweep 2.6s linear infinite;
+}
+
+.vc-ghosted-sort-count {
+    margin-left: auto;
+    margin-right: 8px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 5px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    color: #1a1a1a;
+    background: var(--vc-ghosted-color);
 }

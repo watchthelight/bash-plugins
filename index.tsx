@@ -16,6 +16,7 @@ import { ChannelStore, Menu, MessageStore, UserStore } from "@webpack/common";
 import { AUTHOR_ID, ContributorBadge } from "./badge";
 import { GhostBadge } from "./GhostBadge";
 import { settings } from "./settings";
+import { SortRow } from "./SortRow";
 import * as Store from "./store";
 
 const DECORATOR_ID = "Ghosted";
@@ -56,6 +57,45 @@ export default definePlugin({
 
     contextMenus: {
         "user-context": userContextPatch
+    },
+
+    patches: [
+        // DMs page: re-render when sort toggle / ghost state changes (same seam PinDMs uses)
+        {
+            find: ".FRIENDS},\"friends\"",
+            replacement: [
+                {
+                    match: /let{showLibrary:\i,/,
+                    replace: "$self.useSortRerender();$&"
+                },
+                // "Sort by ghosted" row right after Quests, before the divider that precedes the DM list
+                {
+                    match: /(?=\(0,\i\.jsx\)\(\i,{},"section-divider-top"\))/,
+                    replace: "$self.renderSortRow(),"
+                }
+            ]
+        },
+        // reorder the ids the DM list renders. lazy capture so it still matches after PinDMs
+        // rewrites this to `privateChannelIds:x.filter(...)`
+        {
+            find: "\"dm-quick-launcher\"===",
+            replacement: {
+                match: /(?<=channels:\i,)privateChannelIds:(.+?)(?=,listRef:)/,
+                replace: "privateChannelIds:$self.sortIds($1)"
+            }
+        }
+    ],
+
+    sortIds: Store.sortIds,
+
+    useSortRerender() {
+        Store.useGhostVersion();
+        settings.use(["sortActive", "sortButton"]);
+    },
+
+    renderSortRow() {
+        if (!settings.store.sortButton) return null;
+        return <SortRow key="vc-ghosted-sort" />;
     },
 
     flux: {

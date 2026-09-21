@@ -7,7 +7,8 @@ Discord only badges *unread* DMs. Read one first thing in the morning, think "I'
 - Counts a 1:1 DM as ghosted when: they sent the last message, you've read it, and N hours passed (default 2).
 - Cleared by: sending a message, reacting to their message (toggleable), or right-click → **Not ghosting** / **Snooze ghost 24h**.
 - On startup it fetches the last message of your ~30 most recent DMs so ghosts from before install show up immediately (configurable; 0 disables).
-- Bots ignored by default. Group DMs and servers are not tracked.
+- **Sort by ghosted** row in the DM list (under Quests): click to reorder DMs with the longest-ghosted person on top; click again to restore Discord's order. Shows how many people you're ghosting.
+- Bots ignored by default. Group DMs and servers are not tracked. DMs pinned with PinDMs stay in their categories.
 
 ## Install
 
@@ -46,14 +47,20 @@ Delete `src/userplugins/ghosted`, `pnpm build`. `pnpm uninject` if you want stoc
 | Reaction counts as reply | on | |
 | DMs to fetch on startup | 30 | 0 = never call the API, track from now on only |
 | Show age next to icon | on | |
+| Show 'Sort by ghosted' row | on | |
 
 ## Theming
 
-The badge is `.vc-ghosted-badge`; colour is `--vc-ghosted-color` (falls back to `--text-muted`).
+Badge is `.vc-ghosted-badge`, the nav row `.vc-ghosted-sort-row`. Colours:
 
 ```css
-:root { --vc-ghosted-color: #f1cc69; }
+:root {
+    --vc-ghosted-color: #ffd257; /* base */
+    --vc-ghosted-shine: #fff7d6; /* highlight that sweeps across */
+}
 ```
+
+The sweep animation is off under `prefers-reduced-motion`.
 
 ## How it works
 

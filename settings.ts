@@ -41,5 +41,16 @@ export const settings = definePluginSettings({
         description: "Show how long they've been waiting next to the ghost icon",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    sortButton: {
+        description: "Show a 'Sort by ghosted' row in the DM list (under Quests) that reorders DMs, longest-ghosted first",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    sortActive: {
+        description: "Sort DMs by ghosted (toggled by the row above)",
+        type: OptionType.BOOLEAN,
+        default: false,
+        hidden: true
     }
 });

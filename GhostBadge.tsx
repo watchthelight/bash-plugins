@@ -18,14 +18,6 @@ function formatAge(ms: number) {
     return `${Math.floor(h / 24)}d`;
 }
 
-function GhostIcon() {
-    return (
-        <svg viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden="true">
-            <path d="M4 10a8 8 0 0 1 16 0v11l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2L4 21zm3.7 1a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0zm6 0a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0z" />
-        </svg>
-    );
-}
-
 export const GhostBadge = ErrorBoundary.wrap(function GhostBadge({ channelId }: { channelId: string; }) {
     useGhostVersion();
     // re-render when the ack position moves (you read the DM)
@@ -40,8 +32,9 @@ export const GhostBadge = ErrorBoundary.wrap(function GhostBadge({ channelId }: 
         <Tooltip text={`Ghosted · they messaged ${moment(ghost.since).fromNow()}`}>
             {props => (
                 <span {...props} className="vc-ghosted-badge">
-                    <GhostIcon />
-                    {settings.store.showAge && <span className="vc-ghosted-age">{formatAge(age)}</span>}
+                    {/* icon is a CSS mask so the animated gradient shows through it, same as the text */}
+                    <span className="vc-ghosted-icon vc-ghosted-shine" aria-hidden="true" />
+                    {settings.store.showAge && <span className="vc-ghosted-age vc-ghosted-shine">{formatAge(age)}</span>}
                 </span>
             )}
         </Tooltip>

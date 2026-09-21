@@ -160,6 +160,29 @@ export function getGhost(channelId: string): Ghost | null {
     return { since: e.lastMsgTs };
 }
 
+/** ghosted DMs first (longest-ghosted at top), everyone else in Discord's original order */
+export function sortIds(ids: string[]): string[] {
+    if (!settings.store.sortActive || !Array.isArray(ids)) return ids;
+
+    const ghosted: { id: string; since: number; }[] = [];
+    const rest: string[] = [];
+    for (const id of ids) {
+        const g = getGhost(id);
+        if (g) ghosted.push({ id, since: g.since });
+        else rest.push(id);
+    }
+    if (ghosted.length === 0) return ids;
+
+    ghosted.sort((a, b) => a.since - b.since);
+    return [...ghosted.map(g => g.id), ...rest];
+}
+
+export function getGhostCount() {
+    let n = 0;
+    for (const id of state.keys()) if (getGhost(id)) n++;
+    return n;
+}
+
 /* ---------- REST fetch queue (bootstrap + delete fallback) ---------- */
 
 const queue: string[] = [];
