@@ -14,6 +14,7 @@ import { ChannelStore, Menu, UserStore } from "@webpack/common";
 
 import { isDmChannel } from "../ghosted/store";
 import { RadarBadge } from "./Badge";
+import { injectNote, reinjectNotes } from "./notes";
 import { settings } from "./settings";
 import * as Store from "./store";
 
@@ -46,7 +47,7 @@ export default definePlugin({
     authors: [{ name: "watchthelight", id: 697169405422862417n }],
     tags: ["Friends"],
     // Ghosted's store knows who sent the last message in every DM; this plugin reads it
-    dependencies: ["Ghosted", "MemberListDecoratorsAPI", "ContextMenuAPI"],
+    dependencies: ["Ghosted", "MemberListDecoratorsAPI", "ContextMenuAPI", "CommandsAPI"],
     settings,
 
     contextMenus: {
@@ -60,7 +61,17 @@ export default definePlugin({
             if (!channelId || !userId || userId === UserStore.getCurrentUser()?.id) return;
             if (!isDmChannel(channelId)) return;
             if (!Store.awaitingMsg(channelId)) return;
-            Store.recordTyping(channelId);
+            const burstStart = Store.recordTyping(channelId);
+            if (burstStart) injectNote(channelId, userId, burstStart);
+        },
+
+        // notes are local messages, so put them back whenever the DM's history (re)loads
+        LOAD_MESSAGES_SUCCESS({ channelId }: { channelId: string; }) {
+            if (channelId && isDmChannel(channelId)) reinjectNotes(channelId);
+        },
+
+        CHANNEL_SELECT({ channelId }: { channelId?: string; }) {
+            if (channelId && isDmChannel(channelId)) setTimeout(() => reinjectNotes(channelId), 800);
         },
 
         PRESENCE_UPDATES(e: { updates?: { user?: { id: string; }; status?: string; }[]; }) {

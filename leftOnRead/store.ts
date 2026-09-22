@@ -14,8 +14,10 @@ import { settings } from "./settings";
 export interface Signals {
     /** the message of yours these signals belong to; a new message from you resets them */
     forMsgId: string;
-    /** ms timestamps of TYPING_START from them that never became a message */
+    /** ms start times of typing bursts from them that never became a message */
     typedAt: number[];
+    /** last TYPING_START seen, to tell a continuing burst from a new one */
+    typedLastSeen?: number;
     /** ms timestamps of them coming online (any non-offline status) */
     onlineAt: number[];
     /** they reacted to something in the DM */
@@ -80,17 +82,29 @@ function current(channelId: string, create: boolean): Signals | null {
     return s;
 }
 
-export function recordTyping(channelId: string) {
+/** returns the burst start time when this is a new typing burst, else null */
+export function recordTyping(channelId: string): number | null {
     const s = current(channelId, true);
-    if (!s) return;
+    if (!s) return null;
     const now = Date.now();
-    // Discord re-sends TYPING_START every ~10s while typing; collapse a burst into one event
-    if (s.typedAt.length && now - s.typedAt[s.typedAt.length - 1] < 15_000) {
-        s.typedAt[s.typedAt.length - 1] = now;
-    } else {
-        s.typedAt.push(now);
+    // Discord re-sends TYPING_START every ~10s while typing; collapse a burst into one event.
+    // the stored time is the burst start, so the chat note keeps its place
+    const last = s.typedAt[s.typedAt.length - 1];
+    if (last && now - (s.typedLastSeen ?? last) < 15_000) {
+        s.typedLastSeen = now;
+        changed();
+        return null;
     }
+    s.typedAt.push(now);
+    s.typedLastSeen = now;
     changed();
+    return now;
+}
+
+/** typing burst start times for the message currently awaiting a reply */
+export function getTypedFor(channelId: string): number[] {
+    const s = current(channelId, false);
+    return s ? s.typedAt : [];
 }
 
 export function recordOnline(channelId: string) {

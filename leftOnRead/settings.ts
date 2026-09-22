@@ -30,6 +30,11 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false
     },
+    chatNotes: {
+        description: "Drop a note into the DM itself each time they start typing and don't send: \"@them was typing here at 8:41 PM\". Only you see it",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     reactionClears: {
         description: "A reaction from them counts as a reply and hides the badge",
         type: OptionType.BOOLEAN,
