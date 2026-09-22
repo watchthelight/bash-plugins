@@ -68,6 +68,10 @@ export const Panel = ErrorBoundary.wrap(function Panel() {
 
     if (!status) return <Paragraph>Reading repo state...</Paragraph>;
 
+    // linked in src/userplugins but not part of the running build
+    const needsBuild = status.plugins.some(p => p.linked && !pluginNameForDir(p.dir));
+    const canUpdate = !!updates?.length || needsBuild;
+
     if (!status.installed) {
         return (
             <div>
@@ -133,19 +137,19 @@ export const Panel = ErrorBoundary.wrap(function Panel() {
                 })}>
                     {busy === "check" ? "Checking..." : "Check for updates"}
                 </Button>
-                <Button size="small" disabled={!!busy || !updates?.length} onClick={() => run("update", async () => {
+                <Button size="small" disabled={!!busy || !canUpdate} onClick={() => run("update", async () => {
                     const prefix = await updateAndRebuild();
                     setUpdates([]);
                     askReload(prefix);
                 })}>
-                    {busy === "update" ? "Updating and building..." : "Update and rebuild"}
+                    {busy === "update" ? "Updating and building..." : updates?.length ? "Update and rebuild" : "Rebuild and reload"}
                 </Button>
                 <Button size="small" variant="secondary" disabled={!!busy} onClick={() => run("sync", async () => {
                     const r = await Native.syncLinks();
-                    if (r.created.length) {
+                    if (r.created.length || needsBuild) {
                         const res = await VencordNative.updater.rebuild();
                         if (!res.ok || !res.value) throw new Error("Vencord build failed, check the console");
-                        askReload(`Linked ${r.created.join(", ")}. `);
+                        askReload(r.created.length ? `Linked ${r.created.join(", ")}. ` : "");
                     }
                 })}>
                     {busy === "sync" ? "Syncing..." : "Sync plugins"}
