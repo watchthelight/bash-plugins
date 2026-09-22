@@ -16,15 +16,43 @@
     );
 }
 
+/* ---------- DM row layout ----------
+   Vencord's decorator API sets the name to flex: initial, so a long name pushes the badges
+   out of the row instead of truncating. Let the name shrink with an ellipsis and keep the
+   badge cluster pinned to the right, never wrapping. Applies to any decorator, not just ours. */
+[class*="nameAndDecorators"],
+[class*="nameContainer"] {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+[class*="nameAndDecorators"] > [class*="name"],
+[class*="nameContainer"] > [class*="name"] {
+    flex: 1 1 auto !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-member-list-decorators-wrapper {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    margin-left: auto;
+    padding-left: 4px;
+}
+
 /* ---------- DM row badge ---------- */
 
 .vc-ghosted-badge {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
     flex-shrink: 0;
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1;
+    white-space: nowrap;
 }
 
 .vc-ghosted-age {
