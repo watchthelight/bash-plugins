@@ -11,24 +11,28 @@ import { definePluginSettings } from "@api/Settings";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { Alerts } from "@webpack/common";
 
 import { Panel, updateAndRebuild } from "./panel";
 
 const Native = VencordNative.pluginHelpers.BashPlugins as PluginNative<typeof import("./native")>;
 const logger = new Logger("BashPlugins");
 
-const LAST_CHECK_KEY = "BashPlugins_lastCheck";
-const CHECK_EVERY_MS = 6 * 3600e3;
+const SEEN_KEY = "BashPlugins_lastPromptedSha";
+const POLL_MS = 90_000;
+
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+let prompting = false;
 
 const settings = definePluginSettings({
     autoCheck: {
         type: OptionType.BOOLEAN,
-        description: "Check GitHub for plugin updates when Discord starts (at most every 6 hours)",
+        description: "Watch GitHub while Discord runs and ask as soon as Bash pushes an update (checked every 90 seconds, costs nothing when nothing changed)",
         default: true
     },
     autoUpdate: {
         type: OptionType.BOOLEAN,
-        description: "Pull and rebuild automatically when updates are found, then ask to reload",
+        description: "Skip the question: pull and rebuild on your own, then ask to reload",
         default: false
     },
     panel: {
@@ -37,32 +41,42 @@ const settings = definePluginSettings({
     }
 });
 
-async function startupCheck() {
-    const last = await DataStore.get<number>(LAST_CHECK_KEY) ?? 0;
-    if (Date.now() - last < CHECK_EVERY_MS) return;
-    await DataStore.set(LAST_CHECK_KEY, Date.now());
+async function applyUpdate(message: string) {
+    const prefix = await updateAndRebuild();
+    showNotification({
+        title: "Bash's plugins updated",
+        body: `${prefix}"${message}" is built. Click to reload.`,
+        onClick: () => location.reload()
+    });
+}
 
+async function poll() {
+    if (prompting) return;
     const status = await Native.getStatus();
     if (!status.installed) return;
 
-    const updates = await Native.checkUpdates();
-    if (updates.length === 0) return;
+    const remote = await Native.remoteHead();
+    if (!remote || remote.sha === status.head) return;
 
-    const n = updates.length;
+    const seen = await DataStore.get<string>(SEEN_KEY);
+    if (seen === remote.sha) return;
+    await DataStore.set(SEEN_KEY, remote.sha);
+
     if (settings.store.autoUpdate) {
-        const prefix = await updateAndRebuild();
-        showNotification({
-            title: "Bash's plugins updated",
-            body: `${prefix}${n} new commit${n === 1 ? "" : "s"} built. Click to reload.`,
-            onClick: () => location.reload()
-        });
-    } else {
-        showNotification({
-            title: "Bash's plugins",
-            body: `${n} update${n === 1 ? "" : "s"} available. Click to see what changed.`,
-            onClick: () => openPluginModal(plugins.BashPlugins)
-        });
+        await applyUpdate(remote.message);
+        return;
     }
+
+    prompting = true;
+    Alerts.show({
+        title: "Bash pushed an update",
+        body: `${remote.message}\n\nMake it happen now or later?`,
+        confirmText: "Now",
+        cancelText: "Later",
+        onConfirm: () => { prompting = false; applyUpdate(remote.message).catch(e => logger.error("update failed", e)); },
+        onCancel: () => { prompting = false; },
+        onCloseCallback: () => { prompting = false; }
+    });
 }
 
 export default definePlugin({
@@ -73,8 +87,18 @@ export default definePlugin({
     settings,
 
     start() {
-        if (settings.store.autoCheck) {
-            startupCheck().catch(e => logger.error("update check failed", e));
-        }
+        if (!settings.store.autoCheck) return;
+        const run = () => poll().catch(e => logger.error("update check failed", e));
+        setTimeout(run, 8_000);
+        pollTimer = setInterval(run, POLL_MS);
+    },
+
+    stop() {
+        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    },
+
+    // the panel's notification path reuses this
+    openPanel() {
+        openPluginModal(plugins.BashPlugins);
     }
 });

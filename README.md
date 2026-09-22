@@ -6,6 +6,8 @@ A few plugins I wrote for my own Discord, packaged so friends can install all of
 |---|---|
 | **Ghosted** | Marks DMs you read but never answered. A ghost and a timer appear on the DM row until you reply, react, or dismiss it. A "Sort by ghosted" row in the DM list puts the person who has waited longest on top. |
 | **Turbo** | Makes Discord feel instant. Popouts, modals, menus and folders finish animating immediately, GIFs and animated emoji stay still until you hover, and a few Chromium flags stop the app from throttling itself. Includes a report that lists what else in your setup is costing frames, with one click fixes. |
+| **MultiSend** | Say good morning to everyone at once without it looking like a broadcast. Pick people, write one message (with variants and their name filled in), and it goes out one DM at a time with a few seconds between each, typing indicator first. Button next to the chat box, or `/multisend`. |
+| **ServerExitWizard** | Lists your servers by how long since you last opened them, with member counts and join dates. Tick the dead ones, leave them in one go, and keep a list of what you left with invite links where a public one exists. `/serverexit` or the button in its settings. |
 | **BashPlugins** | The updater. Shows which of these plugins you have, checks GitHub for new commits, and pulls, rebuilds and reloads without leaving Discord. |
 
 ## Install

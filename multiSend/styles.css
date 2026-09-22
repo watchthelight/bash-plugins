@@ -1,0 +1,84 @@
+.vc-ms-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    min-height: 360px;
+}
+
+.vc-ms-left,
+.vc-ms-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.vc-ms-hint {
+    opacity: 0.7;
+    font-size: 12px;
+}
+
+.vc-ms-preview {
+    font-size: 13px;
+}
+
+.vc-ms-quick {
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-ms-count {
+    margin-left: auto;
+    opacity: 0.7;
+    font-size: 12px;
+}
+
+.vc-ms-list {
+    overflow-y: auto;
+    max-height: 340px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 6px;
+}
+
+.vc-ms-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.vc-ms-row:hover,
+.vc-ms-row.vc-ms-on {
+    background: var(--background-modifier-hover);
+}
+
+.vc-ms-row img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.vc-ms-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-ms-handle {
+    margin-left: auto;
+    opacity: 0.5;
+    font-size: 12px;
+}
+
+.vc-ms-footer {
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.vc-ms-progress {
+    opacity: 0.8;
+    font-size: 13px;
+}

@@ -6,7 +6,7 @@
 
 import { execFile as cpExecFile } from "child_process";
 import { IpcMainInvokeEvent } from "electron";
-import { existsSync, lstatSync, readdirSync, rmSync, symlinkSync } from "fs";
+import { existsSync, lstatSync, readdirSync, rmdirSync, symlinkSync, unlinkSync } from "fs";
 import { join } from "path";
 import { promisify } from "util";
 
@@ -89,6 +89,31 @@ export async function checkUpdates(_: IpcMainInvokeEvent): Promise<UpdateEntry[]
     });
 }
 
+export interface RemoteHead {
+    sha: string;
+    message: string;
+}
+
+let etag = "";
+let lastRemote: RemoteHead | null = null;
+
+/**
+ * Newest commit on GitHub, asked over the REST API with an ETag so an unchanged answer costs
+ * nothing against the rate limit. Runs in the main process because the renderer's CSP blocks
+ * api.github.com.
+ */
+export async function remoteHead(_: IpcMainInvokeEvent): Promise<RemoteHead | null> {
+    const res = await fetch("https://api.github.com/repos/watchthelight/bash-plugins/commits/main", {
+        headers: { Accept: "application/vnd.github+json", "User-Agent": "bash-plugins", ...(etag ? { "If-None-Match": etag } : {}) }
+    });
+    if (res.status === 304) return lastRemote;
+    if (!res.ok) return lastRemote;
+    etag = res.headers.get("etag") ?? "";
+    const json: any = await res.json();
+    lastRemote = { sha: json.sha, message: String(json.commit?.message ?? "").split("\n")[0] };
+    return lastRemote;
+}
+
 export async function pull(_: IpcMainInvokeEvent): Promise<boolean> {
     const res = await git(["pull", "--ff-only", "--quiet"]);
     return !res.stderr.includes("fatal");
@@ -113,7 +138,9 @@ export async function syncLinks(_: IpcMainInvokeEvent): Promise<{ created: strin
         const link = join(USERPLUGINS_DIR, entry.name);
         if (!lstatSync(link).isSymbolicLink()) continue;
         if (!existsSync(link)) {
-            rmSync(link);
+            // a junction is a directory entry on Windows: rmdir removes the link, never the target.
+            // symlinks elsewhere go through unlink.
+            try { rmdirSync(link); } catch { unlinkSync(link); }
             removed.push(entry.name);
         }
     }
