@@ -7,7 +7,13 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
+import { TestPanel } from "./TestPanel";
+
 export const settings = definePluginSettings({
+    test: {
+        type: OptionType.COMPONENT,
+        component: TestPanel
+    },
     minAgeMinutes: {
         description: "Minutes your message has to sit unanswered before the radar shows anything",
         type: OptionType.SLIDER,
