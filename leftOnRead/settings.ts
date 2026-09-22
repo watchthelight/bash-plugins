@@ -12,7 +12,7 @@ export const settings = definePluginSettings({
         description: "Minutes your message has to sit unanswered before the radar shows anything",
         type: OptionType.SLIDER,
         markers: [0, 15, 30, 60, 120, 240, 480],
-        default: 30,
+        default: 0,
         stickToMarkers: false
     },
     showTyping: {
