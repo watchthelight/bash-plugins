@@ -5,6 +5,7 @@ A few plugins I wrote for my own Discord, packaged so friends can install all of
 | Plugin | What it does |
 |---|---|
 | **Ghosted** | Marks DMs you read but never answered. A ghost and a timer appear on the DM row until you reply, react, or dismiss it. A "Sort by ghosted" row in the DM list puts the person who has waited longest on top. |
+| **LeftOnRead** | The other direction. When you sent the last message, an eye appears once they start typing in your DM and never send, or come online after your message. Tooltip says how many times and when. Needs Ghosted (it reads Ghosted's record of who spoke last). |
 | **Turbo** | Makes Discord feel instant. Popouts, modals, menus and folders finish animating immediately, GIFs and animated emoji stay still until you hover, and a few Chromium flags stop the app from throttling itself. Includes a report that lists what else in your setup is costing frames, with one click fixes. |
 | **BashPlugins** | The updater. Shows which of these plugins you have, checks GitHub for new commits, and pulls, rebuilds and reloads without leaving Discord. |
 
