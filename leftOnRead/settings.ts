@@ -26,9 +26,9 @@ export const settings = definePluginSettings({
         default: true
     },
     onlyWithSignal: {
-        description: "Only show the badge once there is a typing or online signal. Off shows every DM waiting on a reply",
+        description: "Only show the badge once there is a typing or online signal. Off shows a grey eye on every DM waiting on a reply, which turns blue or red as signals come in",
         type: OptionType.BOOLEAN,
-        default: true
+        default: false
     },
     reactionClears: {
         description: "A reaction from them counts as a reply and hides the badge",

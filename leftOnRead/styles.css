@@ -1,7 +1,8 @@
 /* theming hooks */
 :root {
-    --vc-lor-color: #7aa7ff;      /* waiting, online signal only */
-    --vc-lor-typed-color: #ff8a7a; /* they typed and never sent */
+    --vc-lor-waiting-color: var(--text-muted); /* no signal yet */
+    --vc-lor-color: #7aa7ff;                   /* they came online since */
+    --vc-lor-typed-color: #ff8a7a;             /* they typed and never sent */
 }
 
 .vc-lor-badge {
@@ -11,6 +12,10 @@
     flex-shrink: 0;
     font-size: 11px;
     line-height: 1;
+    color: var(--vc-lor-waiting-color);
+}
+
+.vc-lor-badge.vc-lor-online {
     color: var(--vc-lor-color);
 }
 

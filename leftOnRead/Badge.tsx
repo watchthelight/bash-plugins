@@ -35,11 +35,14 @@ export const RadarBadge = ErrorBoundary.wrap(function RadarBadge({ channelId }: 
     if (settings.store.showPresence && r.online.length)
         lines.push(`Online ${r.online.length} time${r.online.length === 1 ? "" : "s"} since, last ${ago(r.online[r.online.length - 1])}`);
 
-    const typed = r.typed.length > 0;
+    const typed = settings.store.showTyping && r.typed.length > 0;
+    const online = settings.store.showPresence && r.online.length > 0;
+    if (!typed && !online) lines.push("No sign of them yet");
+    const state = typed ? "vc-lor-typed" : online ? "vc-lor-online" : "vc-lor-waiting";
     return (
         <Tooltip text={lines.join(". ")}>
             {props => (
-                <span {...props} className={`vc-lor-badge ${typed ? "vc-lor-typed" : ""}`}>
+                <span {...props} className={`vc-lor-badge ${state}`}>
                     <span className="vc-lor-icon" aria-hidden="true" />
                     <span className="vc-lor-age">{short(Date.now() - r.sentAt)}</span>
                 </span>
